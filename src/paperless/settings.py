@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import base64
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +21,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'e11fl1oa-*ytql8p)(06fbj4ukrlo+n7k&q5+$1md7i+mge=ee'
+SECRET_KEY = os.environ.get(
+    'PAPERLESS_SECRET_KEY',
+    base64.b64encode(os.urandom(64)),
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('PAPERLESS_DEBUG', 'true').lower() == 'true'
 
 ALLOWED_HOSTS = []
 
@@ -81,7 +85,10 @@ WSGI_APPLICATION = 'paperless.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "..", "data", "db.sqlite3"),
+        "NAME": os.environ.get(
+            'PAPERLESS_SQLITE',
+            os.path.join(BASE_DIR, "..", "data", "db.sqlite3")
+        ),
     }
 }
 if os.environ.get("PAPERLESS_DBUSER") and os.environ.get("PAPERLESS_DBPASS"):
